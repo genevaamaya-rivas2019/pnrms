@@ -1,32 +1,81 @@
 <template>
-  <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
+  <v-app>
+    <Header/>
+    <div v-if="isLogout">
+      <br>
+      <br>
+      <br>
+      <Login v-on:login="login"/>
     </div>
-    <router-view/>
-  </div>
+    <div v-else-if="student">
+      <v-content>
+        <router-view/>
+      </v-content>
+    </div>
+    <div v-else>
+      <v-row>
+        <v-col>
+          <br>
+          <br>
+          <br>
+          <Sidebar/>
+        </v-col>
+        <v-col cols="9">
+          <v-content>
+            <router-view/>
+          </v-content>
+        </v-col>
+      </v-row>
+    </div>
+  </v-app>
 </template>
 
-<style>
-#app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-}
+<script>
+import Header from "./components/Header";
+import Sidebar from "./components/Sidebar";
+import Login from "./views/Login";
 
-#nav {
-  padding: 30px;
-}
+export default {
+  name: "App",
 
-#nav a {
-  font-weight: bold;
-  color: #2c3e50;
-}
+  components: {
+    Header,
+    Sidebar,
+    Login
+  },
 
-#nav a.router-link-exact-active {
-  color: #42b983;
-}
-</style>
+  data() {
+    return {
+      isLogout: true,
+      student: false
+    };
+  },
+  beforeUpdate() {
+    this.routeWatcher = this.$watch(
+      function() {
+        return this.$route;
+      },
+      function(route) {
+        if (route.name === "login") {
+          this.isLogout = true;
+        }
+      }
+    );
+  },
+  methods: {
+    login(username) {
+      this.isLogout = false;
+      if (username == "student") {
+        this.student = true;
+        this.$router.push({ name: "student" });
+      } else {
+        this.$router.push({ path: "/educator/dashboard" });
+      }
+    },
+    logout() {
+      this.isLogout = true;
+      this.$router.push({ path: "/" });
+    }
+  }
+};
+</script>
